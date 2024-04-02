@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "./": "./apiRoute.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "./": "(.*)",
+            "dest": "./apiRoute.js"
+        }
+    ]
+}
