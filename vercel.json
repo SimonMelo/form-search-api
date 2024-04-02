@@ -1,15 +1,7 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "src/apiRoute.js",
-            "use": "@vercel/node"
-        }
-    ],
     "routes": [
-        {
-            "src": "(.*)",
-            "dest": "src/apiRoute.js"
-        }
+      { "src": "/api/submit-form", "dest": "/src/apiRoute.js" },
+      { "src": "/(.*)", "dest": "/src/apiRoute.js" }
     ]
-}
+  }
