@@ -5,6 +5,7 @@
     "mysql": "^2.18.1"
   },
   "scripts": {
-    "build": "npm build"
+    "start": "node apiRoute.js",
+    "build": ""
   }
 }

@@ -1,11 +1,11 @@
 const mysql = require("mysql")
 
 const dbConfig = {
-  host: "127.0.0.1",
-  user: "Mysql",
-  port: '3306',
-  password: "C4$4M3l0",
-  database: "formSearchImmobile",
+  host: "",
+  user: "",
+  port: '',
+  password: "",
+  database: "",
 }
 
 const connection = mysql.createConnection(dbConfig)
