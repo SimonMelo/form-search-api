@@ -1,5 +1,6 @@
 const express = require("express")
 const bodyParser = require("body-parser")
+const dbConnection = require("./db")
 const cors = require('cors')
 
 const app = express()
@@ -10,7 +11,7 @@ let submittedFormData = []
 app.use(cors())
 app.use(bodyParser.json())
 
-app.post('/api/submit-form', (req, res) => {
+app.post('/api/submit-form', async (req, res) => {
     const formData = req.body
 
     const mandatoryFields = ['contact.name', 'contact.email', 'contact.phone', 'preference.immobile', 'preference.location', 'preference.price']
@@ -19,6 +20,11 @@ app.post('/api/submit-form', (req, res) => {
     if (missingFields.length > 0) {
         return res.status(400).json({ error: `Os campos ${missingFields.join(', ')} são obrigatórios.` })
     }
+
+    const existContact = await checkExistingContact(formData.contact)
+
+    if (existContact)
+        return res.status(400).json({error: `Esse contato já foi registrado.`})
 
     const formEntry = {
         contact: {
@@ -39,6 +45,20 @@ app.post('/api/submit-form', (req, res) => {
         
     }
 
+    const values = mandatoryFields.map(field => getFieldValue(formData, field))
+
+    const sqlQuery = `INSERT INTO formAnswer (Nome, Email, Telefone, Imovel, Localizacao, Preco) VALUES (?, ?, ?, ?, ?, ?)`
+
+    dbConnection.query(sqlQuery, values, (err, result) => {
+        if (err) {
+            console.error("Erro ao inserir dados no banco de dados:", err)
+            res.status(500).json({ error: 'Houve um problema interno. Tente novamente mais tarde.' })
+        } else {
+            console.log('Dados inseridos com sucesso no banco de dados')
+            res.json({ message: 'Formulário enviado com sucesso' })
+        }
+    })
+
     submittedFormData.push(formEntry)
 
     console.log('Dados recebidos:', formEntry)
@@ -48,6 +68,22 @@ app.post('/api/submit-form', (req, res) => {
 app.get('/api/get-form-data', (req, res) => {
     res.json(submittedFormData)
 })
+
+async function checkExistingContact(contact) {
+    const querySelector = "SELECT * FROM formAnswer WHERE Nome = ? AND Email = ? AND Telefone = ?"
+    const values = [contact.name, contact.email, contact.phone]
+
+    return new Promise((resolve, reject) => {
+        dbConnection.query(querySelector, values, (err, results) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(results.length ?? 0)
+            }
+        })
+            
+    }) 
+}
 
 function getFieldValue(obj, fieldPath) {
     return fieldPath.split('.').reduce((acc, curr) => acc[curr], obj)
