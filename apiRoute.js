@@ -1,14 +1,17 @@
 const express = require("express")
+const jsonServer = require("json-server")
 const bodyParser = require("body-parser")
 const dbConnection = require("./db")
+const middlewares = jsonServer.defaults()
 const cors = require('cors')
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 
 let submittedFormData = []
 
 app.use(cors())
+app.use(middlewares)
 app.use(bodyParser.json())
 
 app.post('/api/submit-form', async (req, res) => {
