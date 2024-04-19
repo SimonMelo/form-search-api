@@ -4,9 +4,7 @@ const dbConnection = require("./db")
 const cors = require('cors')
 
 const app = express()
-const port = process.env.NODE_ENV || 3000
-
-let submittedFormData = []
+const port = 3000
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -59,15 +57,23 @@ app.post('/api/submit-form', async (req, res) => {
         }
     })
 
-    submittedFormData.push(formEntry)
-
     console.log('Dados recebidos:', formEntry)
     res.json({ message: 'Formulário enviado com sucesso' })
 })
 
 app.get('/api/get-form-data', (req, res) => {
-    res.json(submittedFormData)
-})
+    const sqlQuery = "SELECT * FROM formAnswer";
+
+    dbConnection.query(sqlQuery, (err, results) => {
+        if (err) {
+            console.error("Erro ao buscar dados no banco de dados:", err);
+            res.status(500).json({ error: 'Houve um problema interno. Tente novamente mais tarde.' });
+        } else {
+            console.log('Dados do formulário recuperados com sucesso do banco de dados');
+            res.json(results);
+        }
+    });
+});
 
 async function checkExistingContact(contact) {
     const querySelector = "SELECT * FROM formAnswer WHERE Nome = ? AND Email = ? AND Telefone = ?"
